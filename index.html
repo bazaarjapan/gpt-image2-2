@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ラスト・ライ 漫画ビューア</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #0d0d0b;
+        --paper: #f3f0e8;
+        --ink: #171716;
+        --muted: #aaa397;
+        --accent: #d3b15f;
+        --panel: #191814;
+        --line: rgba(255, 255, 255, 0.14);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background:
+          radial-gradient(circle at 20% 0%, rgba(211, 177, 95, 0.16), transparent 34rem),
+          radial-gradient(circle at 90% 20%, rgba(255, 255, 255, 0.08), transparent 28rem),
+          linear-gradient(135deg, #080806, var(--bg) 48%, #17130d);
+        color: var(--paper);
+        font-family: "Yu Mincho", "Hiragino Mincho ProN", "Noto Serif JP", serif;
+      }
+
+      header {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 1rem;
+        align-items: center;
+        padding: 1rem clamp(1rem, 4vw, 3rem);
+        border-bottom: 1px solid var(--line);
+        background: rgba(13, 13, 11, 0.86);
+        backdrop-filter: blur(18px);
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(1.2rem, 2.6vw, 2.1rem);
+        letter-spacing: 0.12em;
+        line-height: 1.2;
+      }
+
+      .subtitle {
+        margin-top: 0.35rem;
+        color: var(--muted);
+        font-size: 0.82rem;
+        letter-spacing: 0.08em;
+      }
+
+      .controls {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        gap: 0.5rem;
+      }
+
+      button,
+      a.button {
+        appearance: none;
+        border: 1px solid rgba(211, 177, 95, 0.42);
+        border-radius: 999px;
+        background: rgba(211, 177, 95, 0.1);
+        color: var(--paper);
+        cursor: pointer;
+        font: inherit;
+        font-size: 0.88rem;
+        padding: 0.55rem 0.85rem;
+        text-decoration: none;
+      }
+
+      button:hover,
+      a.button:hover {
+        background: rgba(211, 177, 95, 0.22);
+      }
+
+      main {
+        padding: clamp(1rem, 3vw, 3rem);
+      }
+
+      .cover {
+        display: grid;
+        place-items: center;
+        margin: 1rem auto 3rem;
+      }
+
+      .cover img {
+        width: min(520px, 92vw);
+        border: 1px solid var(--line);
+        box-shadow: 0 2rem 5rem rgba(0, 0, 0, 0.6);
+      }
+
+      .relationship {
+        display: grid;
+        place-items: center;
+        margin: 0 auto 3rem;
+      }
+
+      .relationship-title {
+        margin: 0 0 1rem;
+        color: var(--muted);
+        font-size: 0.9rem;
+        letter-spacing: 0.16em;
+      }
+
+      .relationship img {
+        width: min(620px, 94vw);
+        border: 1px solid var(--line);
+        box-shadow: 0 2rem 5rem rgba(0, 0, 0, 0.52);
+      }
+
+      .reader {
+        display: grid;
+        gap: clamp(1.2rem, 3vw, 2.5rem);
+      }
+
+      .reader.single {
+        justify-items: center;
+      }
+
+      .reader.spread {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        align-items: start;
+      }
+
+      .page {
+        width: min(100%, 740px);
+        margin: 0 auto;
+        padding: 0.65rem;
+        border: 1px solid var(--line);
+        background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.015));
+        box-shadow: 0 1.4rem 3rem rgba(0, 0, 0, 0.42);
+      }
+
+      .page-label {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.1rem 0.25rem 0.55rem;
+        color: var(--muted);
+        font-size: 0.82rem;
+        letter-spacing: 0.1em;
+      }
+
+      .page img {
+        display: block;
+        width: 100%;
+        height: auto;
+        background: #fff;
+      }
+
+      .toc {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.35rem;
+        justify-content: center;
+        margin: 0 auto 2rem;
+        max-width: 900px;
+      }
+
+      .toc a {
+        min-width: 2.4rem;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        color: var(--paper);
+        padding: 0.35rem 0.55rem;
+        text-align: center;
+        text-decoration: none;
+        background: rgba(255, 255, 255, 0.04);
+      }
+
+      .toc a:hover {
+        border-color: var(--accent);
+      }
+
+      .reading-note {
+        max-width: 900px;
+        margin: 0 auto 2rem;
+        padding: 0.85rem 1rem;
+        border: 1px solid rgba(211, 177, 95, 0.28);
+        background: rgba(211, 177, 95, 0.08);
+        color: var(--muted);
+        font-size: 0.9rem;
+        line-height: 1.7;
+      }
+
+      .reading-note strong {
+        color: var(--paper);
+        font-weight: 600;
+      }
+
+      footer {
+        padding: 3rem 1rem 4rem;
+        color: var(--muted);
+        text-align: center;
+      }
+
+      @media (max-width: 920px) {
+        header {
+          grid-template-columns: 1fr;
+        }
+
+        .controls {
+          justify-content: flex-start;
+        }
+
+        .reader.spread {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div>
+        <h1>ラスト・ライ</h1>
+        <div class="subtitle">MAI / 36ページ漫画ビューア</div>
+      </div>
+      <nav class="controls" aria-label="表示操作">
+        <button id="modeButton" type="button">見開き表示</button>
+        <a class="button" href="#page-01">P1へ</a>
+        <a class="button" href="#page-36">最終ページへ</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="cover" aria-label="表紙">
+        <img src="images/cover.png" alt="ラスト・ライ 表紙" loading="eager">
+      </section>
+
+      <section class="relationship" aria-label="キャラクター相関図">
+        <h2 class="relationship-title">CHARACTER RELATIONSHIP</h2>
+        <img src="images/character_relationship.png" alt="キャラクター相関図" loading="eager">
+      </section>
+
+      <nav id="toc" class="toc" aria-label="ページ一覧"></nav>
+
+      <p class="reading-note">
+        <strong>読み順:</strong>
+        この漫画は日本式の右から左、上から下へ読み進めるコマ割りを基本にしています。
+      </p>
+
+      <section id="reader" class="reader single" aria-label="漫画本文"></section>
+    </main>
+
+    <script>
+      const reader = document.getElementById("reader");
+      const modeButton = document.getElementById("modeButton");
+      const toc = document.getElementById("toc");
+      const pages = [
+        "ニュースとタイトル",
+        "透也の部屋・全景",
+        "目を見たから",
+        "妹、灯里",
+        "玄関チャイム",
+        "GRAVE登場",
+        "家の中の逃走",
+        "夜道へ",
+        "廃墟の距離",
+        "MAIの意味",
+        "グレイヴの説明",
+        "暴走の真相・現在",
+        "暴走の真相・回想",
+        "命令だから？",
+        "嘘の練習",
+        "正確な言葉だけでは",
+        "未分類の反応",
+        "発見前の静寂",
+        "発見",
+        "崩れる廃墟",
+        "合理的な判断",
+        "戻ってきた理由",
+        "回答が困難です",
+        "約束を求める",
+        "生きて戻る嘘",
+        "必ず、生きて戻ってきます",
+        "マアイ対グレイヴ",
+        "これは、私の答えです",
+        "白い閃光",
+        "病院",
+        "守るための嘘",
+        "ECHO",
+        "あの日の嘘",
+        "誰よりも人間らしかった",
+        "完",
+        "回収"
+      ];
+
+      pages.forEach((title, index) => {
+        const pageNumber = String(index + 1).padStart(2, "0");
+        const link = document.createElement("a");
+        link.href = `#page-${pageNumber}`;
+        link.textContent = String(index + 1);
+        toc.append(link);
+
+        const article = document.createElement("article");
+        article.className = "page";
+        article.id = `page-${pageNumber}`;
+        article.innerHTML = `
+          <div class="page-label"><span>P${pageNumber}</span><span>${title}</span></div>
+          <img src="images/pages/page_${pageNumber}.png" alt="P${pageNumber} ${title}" loading="lazy">
+        `;
+        reader.append(article);
+      });
+
+      modeButton.addEventListener("click", () => {
+        const isSpread = reader.classList.toggle("spread");
+        reader.classList.toggle("single", !isSpread);
+        modeButton.textContent = isSpread ? "1ページ表示" : "見開き表示";
+      });
+    </script>
+  </body>
+</html>
